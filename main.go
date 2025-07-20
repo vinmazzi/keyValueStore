@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"github.com/vinmazzi/keyValueStore/core"
+	"github.com/vinmazzi/keyValueStore/encode"
 	"github.com/vinmazzi/keyValueStore/frontend"
 	"github.com/vinmazzi/keyValueStore/transact"
 	"log"
@@ -14,12 +15,17 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	tl, err := transact.NewTransactionLogger(ctx, os.Getenv("TRANSACTION_LOGGER_BACKEND"))
+	encoder, err := encode.NewEncoder(os.Getenv("ENCODER_TYPE"))
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 	}
 
-	kvs := core.NewKeyValueStore(tl)
+	tl, err := transact.NewTransactionLogger(ctx, os.Getenv("TRANSACTION_LOGGER_BACKEND"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	kvs := core.NewKeyValueStore(tl, encoder)
 	err = kvs.Restore(ctx)
 	if err != nil {
 		panic(err)

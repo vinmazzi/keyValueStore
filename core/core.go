@@ -12,42 +12,19 @@ var (
 	CoreDeleteError = errors.New("Error on executing Delete")
 )
 
-type TransactionType byte
-
-const (
-	_ TransactionType = iota
-	PUT
-	DELETE
-)
-
-type Transaction struct {
-	Id              int
-	TransactionType TransactionType
-	Key             string
-	Value           string
-}
-
-type TransactionLogger interface {
-	WritePut(ctx context.Context, key string, value string) error
-	WriteDelete(ctx context.Context, key string) error
-	ReadAll(ctx context.Context) (chan Transaction, chan error)
-}
-
-type Frontend interface {
-	Start() error
-}
-
 type KeyValueStore struct {
 	Store map[string]string
 	m     *sync.RWMutex
 	TransactionLogger
+	Encoder
 }
 
-func NewKeyValueStore(t TransactionLogger) *KeyValueStore {
+func NewKeyValueStore(t TransactionLogger, e Encoder) *KeyValueStore {
 	kvs := &KeyValueStore{
 		TransactionLogger: t,
 		Store:             make(map[string]string),
 		m:                 &sync.RWMutex{},
+		Encoder:           e,
 	}
 
 	return kvs
@@ -58,7 +35,8 @@ func (kvs *KeyValueStore) Put(ctx context.Context, key string, value string) err
 	kvs.Store[key] = value
 	kvs.m.Unlock()
 
-	kvs.TransactionLogger.WritePut(ctx, key, value)
+	encodedValue := kvs.Encode(value)
+	kvs.TransactionLogger.WritePut(ctx, key, encodedValue)
 
 	return nil
 }
@@ -116,7 +94,13 @@ func (kvs *KeyValueStore) Restore(ctx context.Context) error {
 					return err
 				}
 			case PUT:
-				err := kvs.Put(ctx, r.Key, r.Value)
+				decodedValue, err := kvs.Decode(r.Value)
+				if err != nil {
+					err := errors.Join(err, CorePutError)
+					return err
+				}
+
+				err = kvs.Put(ctx, r.Key, decodedValue)
 				if err != nil {
 					err := errors.Join(err, CorePutError)
 					return err

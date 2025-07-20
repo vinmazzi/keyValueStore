@@ -72,10 +72,6 @@ func (rfe RestFrontEnd) PutKeyHandler(rw http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		rw.WriteHeader(http.StatusInternalServerError)
 	}
-	err = rfe.TransactionLogger.WritePut(ctx, key, string(body))
-	if err != nil {
-		log.Println(err)
-	}
 
 	rw.WriteHeader(http.StatusCreated)
 }
@@ -124,4 +120,3 @@ func (rfe *RestFrontEnd) Start() error {
 
 	return err
 }
-
