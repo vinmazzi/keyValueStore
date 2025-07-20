@@ -6,21 +6,6 @@ import (
 	"os"
 )
 
-type TransactionType byte
-
-type Transaction struct {
-	id              int
-	transactionType TransactionType
-	key             string
-	value           string
-}
-
-const (
-	_ TransactionType = iota
-	PUT
-	DELETE
-)
-
 func NewTransactionLogger(ctx context.Context, loggerType string) (core.TransactionLogger, error) {
 	var logger core.TransactionLogger
 	var err error

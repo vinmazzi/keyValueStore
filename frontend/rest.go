@@ -26,6 +26,15 @@ type RestFrontEnd struct {
 	*core.KeyValueStore
 }
 
+func NewRestFrontend(kvs *core.KeyValueStore) *RestFrontEnd {
+	restFrontEnd := &RestFrontEnd{
+		KeyValueStore: kvs,
+	}
+
+	log.Println("Starting REST frontend")
+	return restFrontEnd
+}
+
 func (rfe RestFrontEnd) GetKeyHandler(rw http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	key := vars["key"]
@@ -62,6 +71,10 @@ func (rfe RestFrontEnd) PutKeyHandler(rw http.ResponseWriter, r *http.Request) {
 		err = errors.Join(err)
 		log.Println(err)
 		rw.WriteHeader(http.StatusInternalServerError)
+	}
+	err = rfe.TransactionLogger.WritePut(ctx, key, string(body))
+	if err != nil {
+		log.Println(err)
 	}
 
 	rw.WriteHeader(http.StatusCreated)
@@ -111,3 +124,4 @@ func (rfe *RestFrontEnd) Start() error {
 
 	return err
 }
+
