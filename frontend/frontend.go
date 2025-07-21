@@ -5,12 +5,12 @@ import (
 )
 
 func NewFrontEnd(t string, kvs *core.KeyValueStore) core.Frontend {
-	var frontendO core.Frontend
+	var frontendObj core.Frontend
 	switch t {
 	case "rest":
-		frontendO = NewRestFrontend(kvs)
+		frontendObj = NewRestFrontend(kvs)
 	}
 
-	return frontendO
+	return frontendObj
 }
 
