@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	KeyNotFound     = errors.New("Could not find any register with this key")
+	CoreKeyNotFound = errors.New("Could not find any register with this key")
 	CorePutError    = errors.New("Error on executing Put")
 	CoreDeleteError = errors.New("Error on executing Delete")
 )
@@ -47,7 +47,7 @@ func (kvs *KeyValueStore) Delete(ctx context.Context, key string) error {
 	kvs.m.RUnlock()
 
 	if !ok {
-		return KeyNotFound
+		return CoreKeyNotFound
 	}
 
 	kvs.m.Lock()
@@ -65,7 +65,7 @@ func (kvs KeyValueStore) Get(key string) (string, error) {
 	kvs.m.RUnlock()
 
 	if !ok {
-		return "", KeyNotFound
+		return "", CoreKeyNotFound
 	}
 
 	return v, nil
