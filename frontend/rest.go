@@ -99,7 +99,7 @@ func (rfe *RestFrontEnd) Start() error {
 	router := mux.NewRouter()
 	router.HandleFunc("/v1/key/{key}", rfe.GetKeyHandler).Methods("GET")
 	router.HandleFunc("/v1/key/{key}", rfe.PutKeyHandler).Methods("PUT")
-	router.HandleFunc("/v1/key/{key}", rfe.PutKeyHandler).Methods("DELETE")
+	router.HandleFunc("/v1/key/{key}", rfe.DeleteKeyHandler).Methods("DELETE")
 
 	secondsTimeout, err := strconv.Atoi(os.Getenv("HTTP_IDLE_TIMEOUT"))
 	if err != nil {
